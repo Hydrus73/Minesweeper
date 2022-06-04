@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Minesweeper</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <style>
+    body {
+      background-image: repeating-radial-gradient(#05e886 10%, #0273eb 20%);
+      background-size: 50px 50px;
+      user-select: none;
+    }
+    
+    #logo {
+      height: 80%;
+      width: 80%;
+      top: -30px;
+      left: 10%;
+      position: absolute;
+    }
+
+    #startButton {
+      height: 10%;
+      width: 10%;
+      top: 80%;
+      left: 60%;
+      position: absolute;
+      background-color: #40cf8f;
+      border-radius: 28px;
+      border: 3px black solid;
+      display: inline-block;
+      cursor: pointer;
+      color: #ffffff;
+      font-family: Arial;
+      font-size: 200%;
+      text-shadow: 0px 2px 2px #286654;
+    }
+
+    #startButton:hover {
+      background-color: #1ca37f;
+    }
+
+    #startButton:active {
+      background-color: #177a5c;
+    }
+
+    #dif {
+      background-color: #03fc77;
+      border: black solid 3px;
+      height: 50px;
+      width: 420px;
+      color: #ffffff;
+      font-family: Arial;
+      font-size: 200%;
+      text-shadow: 0px 2px 2px #286654;
+      position: absolute;
+      top: 80%;
+      left: 20%;
+    }
+
+    #difLabel {
+      position: relative;
+      left: 10px;
+      top: 6px;
+    }
+    
+    .select-wrapper {
+      float: left;
+      display: inline-block;
+      border: 3px solid black;
+      background-color: #2a64bd;
+      cursor: pointer;
+      color: #ffffff;
+      font-family: Arial;
+      font-size: 20px;
+      text-shadow: 0px 2px 2px #286654;
+      position: absolute;
+      left: -10px;
+      top: 10px;
+      width: 110px;
+    }
+
+    .select-wrapper,
+    .select-wrapper select {
+      width: 110px;
+      height: 25px;
+      line-height: 25px;
+      margin-left: 300px;
+      background-color: #2a64bd;
+      color: #ffffff;
+      font-family: Arial;
+      font-size: 20px;
+      text-shadow: 0px 2px 2px #286654;
+    }
+
+    .select-wrapper:hover {
+      background-color: #1d488a;
+    }
+
+    .select-wrapper:active {
+      background-color: #081859;
+    }
+    
+    .select-wrapper .holder {
+      display: block;
+      margin: 0 35px 0 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+
+    .select-wrapper select {
+      margin: 0;
+      position: absolute;
+      z-index: 2;
+      cursor: pointer;
+      outline: none;
+      opacity: 0;
+    }
+
+    .holder {
+      cursor: pointer;
+    }
+
+    .falling {
+      background-color: #24803c;
+      z-index: 3;
+      position: absolute;
+      border: solid black 3px;
+    }
+    
+    .hiddenSpot {
+      background-color: #24803c;
+      cursor: pointer;
+      z-index: 3;
+      position: absolute;
+      border: solid black 3px;
+    }
+    
+    .hiddenSpot:hover {
+      z-index: 4;
+      border: solid black 3px;
+      box-shadow: 0px 0px 2px 2px #a4bfeb;
+    }
+    
+    .emptySpot {
+      background-color: #1cc949;
+      z-index: 3;
+      position: absolute;
+      border: solid black 3px;
+      color: #ffffff;
+      font-family: Arial;
+      text-shadow: 0px 2px 2px #286654;
+      text-align: center;
+      cursor: default;
+    }
+
+    .bomb {
+      z-index: 3;
+      position: absolute;
+      border: solid black 3px;
+      background-color: #8dc0e3;
+      background-image: url('Bomb.svg');
+    }
+
+    .end {
+      z-index: 5;
+      background-color: #74f2b7;
+      animation-name: endAnimation;
+      animation-duration: 3s;
+      position: absolute;
+      border: solid black 3px;
+      color: #ffffff;
+      font-family: Arial;
+      font-size: 800%;
+      text-shadow: 0px 2px 2px #286654;
+      text-align: center;
+      left: 25%;
+      top: 37.5%;
+      opacity: 0.9;
+      width: 50%;
+      height: 25%;
+    }
+
+    @keyframes endAnimation {
+      from {
+        opacity: 0.5;
+        width: 5%;
+        height: 2.5%;
+        top: -20%;
+        left: 45%;
+        font-size: 100%;
+      }
+      
+      to {
+        left: 25%;
+        top: 37.5%;
+        opacity: 0.9;
+        width: 50%;
+        height: 25%;
+        font-size: 800%;
+      }
+    }
+
+    .score {
+      background-color: #74f2b7;
+      position: absolute;
+      border: solid black 3px;
+      color: #ffffff;
+      font-family: Arial;
+      text-shadow: 0px 2px 2px #286654;
+      text-align: right;
+      left: 77.5%;
+      top: 40%;
+      width: 275px;
+    }
+
+    .trophy {
+      position: absolute;
+      top: 0px;
+      height: 100%;
+      width: 100%;
+    }
+
+    .score2 {
+      background-color: #74f2b7;
+      position: absolute;
+      border: solid black 3px;
+      color: #ffffff;
+      font-family: Arial;
+      text-shadow: 0px 2px 2px #286654;
+      text-align: left;
+      left: 77.5%;
+      top: 70%;
+      width: 275px;
+    }
+    #name {
+      top: 92%;
+      z-index: 5;
+      width: 35%;
+      height: 6%;
+      left: 30%;
+      text-align: center;
+      background-color: #74f2b7;
+      position: absolute;
+      border: solid black 3px;
+      color: #ffffff;
+      font-family: Arial;
+      text-shadow: 0px 2px 2px #286654;
+      font-size: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='start'>
+    <img draggable='false' id='logo' src='Minesweeper.svg'></img>
+    <div id='dif'>
+      <label id='difLabel'>Choose a difficulty: </label>
+      <select class="custom-select">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="Hard">Hard</option>
+      </select>
+    </div>
+    <button onclick='start();' id='startButton'>Start</button>
+    <div id = 'name'>
+      Created By: Ben MacDougall
+    </div>
+  </div>
+  <div id = 'board'></div>
+</body>
+<script>
+  var board = [];
+  var revealed = [];
+  var revealing = 0;
+  let bombs;
+  class Spot {
+    constructor(row, col, size) {
+      this.row = row;
+      this.col = col;
+      this.id = row*size[1]+col;
+      this.size = size;
+      this.flag = false;
+      $('#board').append('<div class = "hiddenSpot" id = "'+this.id+'"></div>');
+      if (this.size[0] == 10) {
+        $('#'+this.id).css({'height': '50px', 'width': '50px', 'top': row*53+45+"px", 'left': col*53+370+'px', 'font-size': '300%'});
+      } else if (this.size[0] == 15) {
+        $('#'+this.id).css({'height': '32px', 'width': '32px', 'top': row*35+50+'px', 'left': col*35+285+'px', 'font-size': '190%'});
+      } else if (this.size[0] == 20) {
+        $('#'+this.id).css({'height': '25px', 'width': '25px', 'top': row*28+25+'px', 'left': col*28+300+'px', 'font-size': '150%'});
+      }
+      let t = this;
+      $('#'+this.id).click(function() {
+        if (this.flag) {return;}
+        if (revealing > 0) {return;}
+        clickBlock(t.row, t.col);
+      });
+      $('#'+this.id).on("contextmenu", function(e){
+        e.preventDefault();
+        if (!t.flag) {
+          $('#'+t.id).css('background-image', 'url("Flag.svg")');
+        } else {
+          $('#'+t.id).css('background-image', '');
+        }
+        t.flag = !t.flag;
+      });
+      this.revealed = false;
+    }
+    setStatus(status, i=this.id) {
+      if (this.revealed) {return;}
+      $('#'+i).removeClass();
+      $('#'+i).addClass(status);
+    }
+    getStatus() {
+      return $('#'+this.id).attr('class');
+    }
+    getBomb() {
+      return this.bomb;
+    }
+    setBomb(val) {
+      this.bomb = val;
+      if (this.bomb) {
+        this.element = $('#'+this.id).clone().attr('id', this.id.toString()+'-2').insertAfter('#'+this.id).show();
+        let t = this;
+        $('#'+this.id.toString()+'-2').click(function() {
+          if (t.flag) {return;}
+          if (revealing > 0) {return;}
+          clickBlock(t.row, t.col);
+        });
+        $('#'+this.id).unbind('click');
+        $('#'+this.id.toString()+'-2').on("contextmenu", function(e){
+          e.preventDefault();
+          if (!t.flag) {
+            $('#'+t.id.toString()+'-2').css('background-image', 'url("Flag.svg")');
+          } else {
+            $('#'+t.id.toString()+'-2').css('background-image', '');
+          }
+          t.flag = !t.flag;
+        });
+      }
+    }
+    setVal(val) {
+      this.val = val;
+    }
+    print() {
+      return this.row + ' ' + this.col + ' ' + $('#'+this.id).attr('class');
+    }
+    getFlag() {
+      return this.flag;
+    }
+    reveal() {
+      let element;
+      if (!this.bomb) {
+        element = $('#'+this.id).clone().attr('id', this.id.toString()+'-2').insertAfter('#'+this.id).show();
+        if (this.flag) {
+          $('#'+this.id).css('background-image', '');
+        }
+      }
+      else {
+        element = this.element;
+      }
+      this.endClick();
+      if (this.bomb) {
+        this.setStatus('bomb');
+      }
+      else {
+        this.setStatus('emptySpot');
+        $('#'+this.id).html(this.val);
+      }
+      this.setStatus('falling', this.id.toString()+'-2');
+      element.css('z-index', 5);
+      let opacity = 1;
+      $('#'+this.id.toString()+'-2').html('');
+      let i = setInterval(function() {
+        element.css('opacity', opacity);
+        opacity -= Math.random()*0.5;
+        if (opacity < 0) {
+          element.remove();
+          clearInterval(i);
+        }
+      }, 50);
+      this.revealed = true;
+    }
+    endClick() {
+      $('#'+this.id).unbind('click');
+      $('#'+this.id.toString()+'-2').unbind('click');
+      $('#'+this.id).unbind('contextmenu');
+      $('#'+this.id).on("contextmenu", function(e){
+        e.preventDefault();
+      });
+      $('#'+this.id.toString()+'-2').unbind('contextmenu');
+      $('#'+this.id.toString()+'-2').on("contextmenu", function(e){
+        e.preventDefault();
+      });
+    }
+    getId() {
+      return this.id;
+    }
+  }
+  var time = -1;
+  function end(text) {
+    setTimeout(function() {
+      $('body').append("<div id = 'end' class = 'end'>"+text+"</div>");
+    }, 1000);
+  }
+  function win() {
+    for (let r = 0; r < board.length; r++) {
+      for (let c = 0; c < board[0].length; c++) {
+        board[r][c].endClick();
+        board[r][c].setStatus('falling', board[r][c].getId().toString()+'-2');
+        board[r][c].setStatus('falling');
+      }
+    }
+    time = Math.floor((Date.now() - time)/1000);
+    let highScore;
+    if (localStorage.getItem('score-'+difficulty) && localStorage.getItem('score-'+difficulty) != 0) {
+      highScore = localStorage.getItem('score-'+difficulty);
+      if (time < highScore) {
+        localStorage.setItem('score-'+difficulty, time);
+      }
+    }
+    else {
+      localStorage.setItem('score-'+difficulty, time);
+    }
+    highScore = localStorage.getItem('score-'+difficulty);
+    timeToSize = {1: 800, 2: 750, 3: 600, 4: 475};
+    timeToOffset = {1: -50, 2: -60, 3: -75, 4: -90};
+    $('body').append('<div id = "score" class = "score">'+time+'</div>');
+    $('#score').css('font-size', timeToSize[time.toString().length]+'%');
+    $('#score').prepend('<img src = "Trophy.svg" class = "trophy"></img>');
+    $('.trophy').css('left', timeToOffset[time.toString().length]+'px');
+    $('body').append('<div id = "score2" class = "score2">High: '+highScore+'</div>');
+    $('#score2').css('font-size', timeToSize[highScore.toString().length]/2+'%');
+    end('You Win!');
+  }
+  function loss() {
+    for (let r = 0; r < board.length; r++) {
+      for (let c = 0; c < board[0].length; c++) {
+        board[r][c].endClick();
+      }
+    }
+    let revealedBombs = 0;
+    for (let r = 0; r < board.length; r++) {
+      for (let c = 0; c < board[0].length; c++) {
+        if (board[r][c].getBomb() || board[r][c].getFlag()) {
+          revealedBombs++;
+          setTimeout(function() {
+            new Audio('Pop.mp3').play();
+            board[r][c].reveal();
+          }, revealedBombs*150);
+        }
+        else if (board[r][c].getStatus() == 'hiddenSpot') {
+          board[r][c].setStatus('falling');
+        }
+      }
+    }
+    end('You Lose!');
+  }
+  var audio = false;
+  function clickBlock(row, col) {
+    let thisOne = false;
+    if (!audio) {
+      new Audio('Pop.mp3').play();
+      audio = true;
+      thisOne = true;
+    }
+    if (equalsIn([row, col], revealed)) {
+      return;
+    }
+    if (!start) {
+      setBoard(row, col);
+      time = Date.now();
+    }
+    let s = board[row][col];
+    let bomb = 0;
+    for (let r = row-1; r < row+2; r++) {
+      for (let c = col-1; c < col+2; c++) {
+        try {
+          if (board[r][c].getBomb()) {
+            bomb++;
+          }
+        } catch (error) {continue;}
+      }
+    }
+    if (s.getBomb()) {
+      loss();
+      return;
+    }
+    else if (bomb != 0) {
+      if (s.getFlag()) {return;}
+      s.setVal(bomb);
+      s.reveal();
+      revealed.push([row, col]);
+      if ((board.length)*(board[0].length)-bombs == revealed.length) {
+        win();
+        return;
+      }
+    }
+    else {
+      if (!s.getFlag()) {
+        s.reveal();
+        revealed.push([row, col]);
+        if ((board.length)*(board[0].length)-bombs == revealed.length) {
+          win();
+          return;
+        }
+      }
+      for (let r = row-1; r < row+2; r++) {
+        for (let c = col-1; c < col+2; c++) {
+          try {
+            if (equalsIn([r, c], revealed) || board[r][c].getFlag()) {continue;}
+            if (!board[r][c].getBomb()) {
+              revealing++;
+              clickBlock(r, c);
+              revealing--;
+            }
+          } catch (error) {continue;}
+        }
+      }
+    }
+    if (thisOne) {
+      audio = false;
+    }
+  }
+  function equals(l1, l2) {
+    for (let i = 0; i < l1.length; i++) {
+      if (l1[i] != l2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function equalsIn(l1, big) {
+    for (let i = 0; i < big.length; i++) {
+      if (equals(big[i], l1)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function setBoard(row, col) {
+    switch (size[0]) {
+      case 10:
+        bombs = 10;
+        break;
+      case 15:
+        bombs = 40;
+        break;
+      case 20:
+        bombs = 99;
+        break;
+      default:
+        bombs = 0;
+        break;
+    }
+    for (let i = 0; i < bombs; i++) {
+      let coords = [Math.floor(Math.random()*board.length), Math.floor(Math.random()*board[0].length)];
+      if ((coords[0] < row+2 && coords[0] > row-2)&&(coords[1] < col+2 && coords[1] > col-2)) {
+        i--;
+        continue;
+      }
+      else if (!board[coords[0]][coords[1]].getBomb()) {
+        board[coords[0]][coords[1]].setBomb(true);
+      }
+      else {
+        i--;
+        continue;
+      }
+    }
+    start = true;
+  }
+  $('body').css('overflow', 'hidden');
+  $('#board').hide();
+  var difficulty = '';
+  var size = [];
+  var start = false;
+  $(".custom-select").each(function() {
+    $(this).wrap("<span class='select-wrapper'></span>");
+    $(this).after("<span class='holder'></span>");
+  });
+  $(".custom-select").change(function() {
+    var selectedOption = $(this).find(":selected").text();
+    $(this).next(".holder").text(selectedOption);
+    difficulty = selectedOption;
+  }).trigger('change');
+  $('#startButton').click(function() {
+    $('#board').html('');
+    $('#start').hide();
+    board = [];
+    switch (difficulty) {
+      case 'Easy':
+        size = [10, 10];
+        break;
+      case 'Medium':
+        size = [15, 20];
+        break;
+      case 'Hard':
+        size = [20, 25];
+        break;
+      default:
+        size = [-1, -1];
+        break;
+    }
+    for (let row = 0; row < size[0]; row++) {
+      board.push([]);
+      for (let col = 0; col < size[1]; col++) {
+        let s = new Spot(row, col, size);
+        board[row].push(s);
+      }
+    }
+    $('#board').show();
+  });
+</script>
+
+</html>
